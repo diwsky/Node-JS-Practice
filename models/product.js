@@ -1,77 +1,27 @@
-const fs = require("fs")
-const path = require("path")
+const Sequelize = require("sequelize")
 
-const Cart = require("./cart")
+const sequelize = require("../util/db")
 
-const p = path.join(
-	path.dirname(process.mainModule.filename),
-	"data",
-	"products.json"
-)
+const product = sequelize.define("product", {
+	id: {
+		type: Sequelize.INTEGER,
+		autoIncrement: true,
+		allowNull: false,
+		primaryKey: true,
+	},
+	title: Sequelize.STRING,
+	price: {
+		type: Sequelize.DOUBLE,
+		allowNull: false,
+	},
+	description: {
+		type: Sequelize.STRING,
+		allowNull: false,
+	},
+	imageUrl: {
+		type: Sequelize.STRING,
+		allowNull: false,
+	},
+})
 
-const getProductsFromFile = cb => {
-	fs.readFile(p, (err, fileContent) => {
-		if (err) {
-			cb([])
-		} else {
-			cb(JSON.parse(fileContent))
-		}
-	})
-}
-
-module.exports = class Product {
-	constructor(id, title, imageUrl, description, price) {
-		;(this.id = id), (this.title = title)
-		this.imageUrl = imageUrl
-		this.description = description
-		this.price = price
-	}
-
-	save() {
-		getProductsFromFile(products => {
-			if (this.id) {
-				const existingProductIndex = products.findIndex(
-					prod => prod.id == this.id
-				)
-				const updatedProduct = [...products]
-				updatedProduct[existingProductIndex] = this
-
-				fs.writeFile(p, JSON.stringify(updatedProduct), err => {
-					console.log(err)
-				})
-			} else {
-				this.id = Math.random().toString()
-				products.push(this)
-				fs.writeFile(p, JSON.stringify(products), err => {
-					console.log(err)
-				})
-			}
-		})
-	}
-
-	static deleteById(id) {
-		getProductsFromFile(products => {
-			const product = products.find(product => product.id === id)
-			const updatedProduct = products.filter(prod => prod.id !== id)
-
-			fs.writeFile(p, JSON.stringify(updatedProduct), err => {
-				if (!err) {
-					Cart.deleteProductCart(id, product.price)
-				}
-			})
-		})
-	}
-
-	static fetchAll(cb) {
-		getProductsFromFile(cb)
-	}
-
-	static findById(id, callback) {
-		getProductsFromFile(products => {
-			const product = products.find(p => {
-				return p.id === id
-			})
-			callback(product)
-		})
-	}
-}
+module.exports = product
