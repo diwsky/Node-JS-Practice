@@ -20,6 +20,8 @@ const Product = require("./models/product")
 const User = require("./models/user")
 const Cart = require("./models/cart")
 const CartItem = require("./models/cart-item")
+const Order = require("./models/order")
+const OrderItem = require("./models/order-item")
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.static(path.join(__dirname, "public")))
@@ -43,9 +45,12 @@ User.hasOne(Cart)
 Cart.belongsTo(User)
 Cart.belongsToMany(Product, { through: CartItem })
 Product.belongsToMany(Cart, { through: CartItem })
+Order.belongsTo(User)
+Order.belongsToMany(Product, { through: OrderItem })
+User.hasMany(Order)
 
 db
-	// sync({ force: true })
+	// .sync({ force: true })
 	.sync()
 	.then(result => {
 		return User.findByPk(1)
@@ -57,7 +62,12 @@ db
 		return user
 	})
 	.then(user => {
-		return user.createCart()
+		user.getCart().then(cart => {
+			if (cart) {
+				return user
+			}
+			return user.createCart()
+		})
 	})
 	.then(cart => {
 		app.listen(3000)

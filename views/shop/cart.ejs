@@ -18,8 +18,16 @@
                         </li>
                     <% }) %>
                 </ul>
+                <hr/>
+                <div class="centered">
+                    <form class="" method="POST" action="/create-order">
+                        <button class="btn">Order Now!</button>
+                    </form>
+                </div>
             <%} else { %> 
                 <h1>No product in carts!</h1>
             <%} %>
+
+            
         </main>
         <%- include('../includes/end.ejs') %>
